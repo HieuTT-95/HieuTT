@@ -1,0 +1,252 @@
+Homework LPIC 1 + 2 
+Lesson 2 - Exploring Linux Command-Line Tools - Part 1
+
+II. Basic Commands
+1. Display the system's date.
+date
+
+2. Display the whole calendar for the year 2003.
+cal 2003
+
+3. Display the month of January for the years 1999 and 99. Are 1999 and 99 the same?
+The same
+
+4. There are two commands that will display information about all users currently on the local system. Display who is currently logged in on your system. Check to see when they logged in.
+who -a
+finger (phải cài thêm)
+
+5. Display just your login name.
+whoami
+
+6. Use the echo command to write the character string Out to Lunch to your display.
+echo Out to Lunch
+
+7. Use the clear command to clear your screen.
+clear
+
+
+8. Login to the system.
+
+
+9. Using the pwd command, verify that you are in your home directory, /home/student, the directory where you are placed when you first login.
+pwd 
+
+10. Change your current directory to the root directory (/).
+cd / 
+
+11. Verify that you are in the root directory and then execute both a simple and a long listing of the files in that directory.
+pwd
+ls -l
+ls 
+
+12. Issue the ls command with the -a and the -R options. What is the effect of each option?
+(Note: The Is -R will provide extensive output. Once you have seen enough, do the key sequence <Ctri-c> to end the command.)
+ls -aR 
+-a hiển thị all(tẩt cả)
+-R hiển thị cả file bên tronng từng folder
+
+13. Return to your home directory (/home/student) and list its contents including hidden files
+cd 
+cd /home/student
+ls -al
+
+14. Bring up the man pages for the man command. Read the text that follows to obtain a better understanding of the functionality of the man command.
+Remember to use the space bar to go forward one screen and the return key to go forward one line. Press the b key to go back one screen. When you have read enough, exit man using the q key or <Ctrl-c>
+man man 
+
+15. Using the man command, search on the keyword calendar. From the list produced, find the command that displays a calendar.
+man -k calendar
+
+16. Having found the cal command from the previous step, use man without any options to obtain the correct syntax of the command.
+man cal
+
+17. List the previous command you've already run
+history
+
+18. Re-run the 20th command
+!20
+
+19. Delete the 20th command from your history
+history -d 20
+
+20. Clear all history
+history -c 
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+Lesson 3 - Exploring Linux Command-Line Tools - Part 2
+
+1. Ensure that you are in your home directory. Create a file in your home directory named vitest.
+pwd
+vim vitest
+
+2. When you open a vim file, you are automatically placed in command mode. Press the i key (insert) to switch to input (text) mode. You can also press the a key (append).
+Use of i or a simply determines if typing starts before or after the cursor.
+There is no indication to tell you that you are in input mode.
+Switch from input mode to command mode by pressing the ESC key. Press ESC a second time. Notice that if you press ESC twice, you will get a "beep" from the terminal (some ASCII terminals do not beep). 
+The beep indicates that you are in command mode already. Now press i again to put you back in input mode.
+Continue to the next step.
+i or a: input mode
+Esc : switch command mode
+
+3. Input the following text EXACTLY as it is presented line by line. Then key in the alphabet, one character per line. Following will show a-d but continue on through z. 
+Adding the alphabet is an easy way to fill a couple of screens of information needed for later use.
+
+This is a training session about the usage of the vim editor.
+We need some more lines to learn the most common commands of the editor. We are now in the entry mode and we will switch right after this to the command mode.
+    a
+    b
+    c
+    d
+    .
+    .
+    .
+    .
+    z
+
+4. Return to command mode. Write and quit the file. Notice that as soon as you press the : (colon), it appears below the last line of your input area. Once the buffer is
+empty and the file is closed, you will see a message giving the number of linesand characters in the file.
+Esc
+:wq
+
+
+Cursor Movement Keys
+5. Open vimtest using vim.
+vim vimtest
+
+6. Using both the arrow keys and the h, j, k, l keys, practice moving the cursor down one line, up one line, right a couple characters, and back a couple characters.
+h : sang trái 
+l : sang phải
+j : xuống 
+k : lên 
+
+7. You may not want to cursor one character or one line at a time throughout an entire file. Practice using cursor movement keys to work around by page or by line. 
+Using the cursor movement keys from instruction 6, position your cursor at the first line of the file. While in command mode, do the following:
+    i. Move cursor to last line in the file
+        G
+    ii. Move cursor to first line in the file
+        gg hoặc 1G hoặc 1gg hoặc :1
+    iii. Move cursor to line 4 of the file
+        4gg hoặc 4G hoặc :4
+    iv. Move cursor to end of line
+        $
+    v. Move cursor to beginning of line
+        0
+
+8. Move your cursor to the top of the file. Search for the word entry. Your cursor
+should be on the e. Switch to input mode and add the word text. Don't forget the
+space after the word.
+gg
+/entry
+i ( chuyển mod)
+
+9. Move the cursor to the space after the word mode on the same line. Insert a
+comma. Remember, you are still in input mode.
+Esc (chuyển mode)
+$
+i (chuyển mode)
+.
+
+10.Enter command mode. Position the cursor anywhere on the line beginning with
+"some more lines." Insert a blank line to form two paragraphs.
+Esc
+/some more lines
+i
+o
+
+11.Opening up a blank line as in the previous step, automatically puts you in input
+mode; therefore, return to command mode. Now save the changes you have made
+so far, but DON'T exit the editor.
+:w
+
+12.While still in command mode, remove the alphabetic characters c,e,g but leave
+the blank lines in their place; in other words, don't delete the entire line, just the
+character. Then go back and remove the blank lines. This will give you practice
+using two of the delete functions.
+x (Để xóa 1 ký tự)
+dd (Để xóa dòng trắng)
+
+13.You just decided you really don't want to save the changes to the alphabetic
+characters. Quit the editing session without saving the changes made since the
+last save.
+:q!
+
+14.Edit vimtest one more time. First, copy the first paragraph one line at a time to
+the end of the file. When that is complete, copy the second paragraph all at once
+to the end of the file.
+con trỏ sau khi mở ở dòng 1, ấn yy sau đó G rồi p
+chuyển sang dòng 2: 2gg , ấn yy sau đó G rồi p
+tương tự là 3gg 4gg, ...
+
+15.You just decided that the lines you just added to the end of file don't look right.
+Delete them all with one command.
+Chuyển con trỏ đến dòng muốn bắt đầu xóa 
+đếm số dòng cần xóa (liên tiếp) rồi 4dd
+
+16.Now, before you do anything else with this file, you decide you need to imbed the
+current date and time as the first line of the file. Do this without leaving the vim
+editor.
+:r!date
+
+17.Using vim create the following files
+- string.txt with the following content:
+    Alpha
+    Tango
+    Bravo
+    Echo
+    Foxtrot
+- number.txt with the following content:
+    135
+    178
+    238
+    982
+    911
+Process text file utilities
+
+18.Using cat command to view the content of string.txt file.
+cat string.txt
+
+19.Display the content of string.txt and number.txt files to the screen
+cat string.txt number.txt
+
+20.Using od to display the content of string.txt in octal
+od string.txt
+
+21.Split the vimtest file to files with maximum of 4 line each
+split -l 4 vitest
+
+22.Sort the content of string.txt in alphabetical order and sort the numbers in
+number.txt from the smallest to the biggest.
+sort -d string.txt
+sort -n number.txt
+
+23.Display the string.txt content to screen with line number, not including blank lines.
+nl string.txt (ko đếm dòng trắng)
+cat -n (tính cả dòng trắng)
+
+24.Use less and more to view the content of /var/log/messages, move next and back
+accross pages. You need to use sudo to gain the superuser previleges.
+ sudo less /var/log/messages (more)
+
+25.View the content of /var/log/messages again but using the head and tail.
+sudo head  /var/log/messages (more)
+
+26.Display the content of /var/log/messages in real-time with tail. Use Ctrl+C to escape
+sudo tail -f /var/log/messages
+
+27.Count the number of lines in /etc/passwd file, is that the number of users created on server?
+wc -l /etc/passwd
+
+28.Display only the username from the /etc/passwd
+cut -d ":" -f 1 /etc/passwd
+
+29.Create the hash using md5 and sha512 algorithm for the number.txt file. Create a new file with the same content of number.txt, name it number1.txt. 
+Hashing the number1.txt and compare with the hash value of number.txt.
+
+md5sum number.txt
+sha512sum number.txt
+vim number1.txt
+:r number.txt
+:wq
+md5sum number1.txt
+sha512sum number1.txt

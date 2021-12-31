@@ -1,0 +1,10 @@
+Link KVM
+https://www.tecmint.com/install-kvm-on-ubuntu/
+
+Creat VM via command line
+    sudo virt-install --name=deepin-vm --os-variant=Debian10 --vcpu=2 --ram=2048 --graphics spice --location=/home/Downloads/deepin-20Beta-desktop-amd64.iso --network bridge:vibr0
+
+To get additional information about OS variants, run the command
+    osinfo-query os
+
+    

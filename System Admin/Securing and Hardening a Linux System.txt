@@ -1,0 +1,407 @@
+Securing and Hardening a Linux System
+
+INFOSEC
+1.  Do not assume anything.
+2.  Nothing is secure.
+3.  Trust no-one, nothing.
+4.  Security is a trade-off with usability.
+5.  Paranoia is your friend.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Security Checklist
+
+1.  Ensure Physical Security.
+2.  BIOS Protection.
+3.  Disable Booting from external media devices.
+4.  Boot Loader Protection.
+5.  Keep the OS updated (only from trusted sources).
+6.  Check the installed packages and remove the unnecessary ones.
+7.  Check for Open Ports and stop unnecessary services.
+8.  Enforce Password Policy.
+9.  Audit Passwords using John the Ripper.
+10. Eliminate unused and well-known accounts that are not needed.
+11. Give users limited administrative access.
+12. Do not use the root account on a regular basis and do not allow direct root login.
+13. Set limits using the ulimit command to avoid DoS attacks such as launching a fork bomb.
+14. Set proper file permissions.
+    a.  Audit the Set User ID (SUID) and Set Group ID (SGID) binaries on the system.
+    b.  Do not mount remote filesystems with root read-write access. Read-only access would be enough.
+    c.  Set the sticky bit on any world-writable directories.
+    d.  harden /tmp – mount it on a separate partition (not to fill all the disk space), mount it with noexec,nosuid bits set.
+15. Implement File Monitoring (Host IDS - AIDE).
+16. Scan for Rootkits, Viruses, and Malware (Rootkit Hunter, chkrootkit, ClamAV).
+17. Use Disk Encryption to protect your data. Don’t forget to encrypt your Backups as well.
+18. Secure every Network Service especially SSHd
+19. Scan your Network and Hosts using Nmap.
+20. Securing Your Linux System with a Firewall (Netfilter/Iptables).
+21. Monitor the firewall and its logs.
+22. Monitor your logs and search for suspicious activity (logwatch).
+23. Scan your servers using a VAS such as Nessus or OpenVAS.
+24. Make backups and test them.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Securing SSH servers
+
+1.  Change default port SSH from 22 to another (check add rule firewall)
+2.  Disable direct root login
+3.  Disable Password authentication entirely if possible and enable only public view if can't just using only strong Passwords.
+4.  Limit user ssh access ( using AllowUsers to add user + using iptables to add rule accept ssh from some IP to servers)
+5.  Using ssh protocol version 2 and should configure an idle timeout interval
+6.  Set clientaliveinterval=300 and  to kickout client not active after timeout.
+7.  Also check clientalivecountmax=0 and check MaxAuthTries (This specifies the maximum number of authentication attempts permitted per connection) 
+    Also check Max Startups (This option specifies the maximum number of concurrent unauthenticated connections to the ssh daemon) and check log-in grace time 
+    (The server disconnects after this time if the user has not successfully logged in).
+8. Always using latest version of SSH.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Securing BootLoader
+
+Boot Sequence Order
+1.  BIOS executes MBR (Master Boot Record)
+2.  MBR executes GRUB2
+3.  GRUB2 loads the kernel
+4.  The kernel executes systemd which initialize the system.
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Security Checklist
+1.  Physical Security
+2.  Setup a BIOS Password
+3.  Configure the system to boot automatically from Linux partition
+4.  Setup a Password for GRUB
+    - Generate Hashed Password
+        grub-mkpasswd-pbkdf2 ( sau đó nhập Password 2 lần)
+    - Chỉnh sửa file /etc/grub.d/40_custom
+        set superusers="root"
+        password_pbldf2 root [password_hashed]
+    - Chạy update-grub2  
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Enforcing Password Policy
+
+
+Chỉnh sửa file /etc/login.defs
+    Kiểm tra trường Password aging controls Thêm trường PASS_MIN_LEN 
+Set password expire 90 day
+    sudo change -M 90 [username]
+Check lại = sudo change -l [username]
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+File PAM configuration: /etc/pam.d/common-password  on Ubuntu and /etc/pam.d/system-auth on RedHat or CentOS
+On Ubuntu System make sure installed libpam-pwquality
+Mở file /etc/pam.d/common-password
+    Tìm dòng password requisite thêm 1 vài dòng vào sau "pam_pwquality.so  retry=3" minlen=8 difok=3 ucredit=-1 lcredit=-1 dcredit=-1 ocredit=-1
+            retry=3: will prompt the user 3 times before exiting and returning an error
+            minlen=8 specifies that the password cannot be less than 8 characters
+            difok=3  implies that only a maximum of 3 characters changes in the new passport should be present in the old passport
+            ucredit -1 requires at least one uppercase character in the password
+            lcredit=-1 requires at least one lowercase character in the password
+            dcredit=-1 implies that the passport should have at least a numeric character
+            ocredit=-1 requires at least one special character included in the password
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Locking or Disabling User Accounts
+
+Lock password user  
+    sudo passwd -l [username]
+Kiểm tra status user 
+    sudo passwd --status [username]  =  sudo change -l [username]
+Unlock password user  
+    sudo passwd -u [username]
+To completely disable accounts 
+    sudo usermod --expiredate 1 [username]     =     sudo usermod --expiredate 1970-01-02 [username]
+Enable a disable accounts 
+    sudo usermod --expiredate "" [username]
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Giving Limited Root Privileges
+
+Check user belong to sudoers group 
+    grep sudo /etc/group
+
+Credentials for first time using sudo last 15 minutes. sudo -k để clear cached
+Sudo su cho phép nâng quyền lên root trong phiên terminal hiện tại cho tới khi log out.
+Limit quyền của user
+
+Chỉnh sửa default editor:
+    sudo update-alternatives -- config editor
+
+Cấu trúc của file sudoers 
+  1   2      3      4 
+root ALL=(ALL:ALL) ALL
+
+    1.  Host which configure sudo permissions (group thì có thêm % phía trước ví dụ %team)
+    2.  Phạm vi áp dụng của rules này 
+    3.  Lệnh được chạy dưới quyền của ai (bỏ trống mặc định là root) 
+    4.  Lệnh được ấp dụng
+
+Add user
+    sudo useradd -d /home/[username] -m -s /bin/bash [username]
+
+Set password
+    sudo passwd [username]
+
+Có thể tạo alias để dễ quản lý (Trường User alias specification và Cmnd alias specification và Host alias specification)
+    User_Alias MYADMIN=[username1],[username2]
+    Cmnd_Alias FILE=/usr/bin/cp,/usr/bin/ls,/usr/bin/touch,usr/bin/rm
+
+Chỉnh sửa file /etc/sudoers using visudo
+Trường User Privilege 
+    thêm quyền sudo cho user ví dụ    dan  ALL==(root)  PASSWD:/usr/bin/ls,/usr/bin/cat NOPASSWD:/usr/bin/apt  (sử dụng which để lấy path)
+    Ví dụ: MYADMIN  ALL=(root)  /usr/bin/netstat,FILE (Trường hợp này sử dụng Alias MYADMIN và FILE)
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Setting User's Limits
+
+Fork bomb (rabbit virus or wabbit) là kiểu tấn công từ chối dịch vụ (DoS) sử dụng tính năng folk system call to make vòng lặp vô hạn các tiến trình 
+    1.  Tạo file bash cd bomb
+    2.  Chỉnh sửa nội dung : $0 && $0 &
+            $0 : represents the script it self, so the script is running recursively 2 timé and going to background for another recursive call
+
+Prevent Fork bomb             
+    Check number process that user can perform
+        ulimit -u
+    Show a lot of limits available to the shell and the process it creates
+        ulimit -a 
+    Chỉnh sửa file /etc/security/limits.conf
+        sudo vi /etc/security/limits.conf
+    Thêm vào dòng : $User           hard    nproc       [value] (cẩn thận value thấp quá sẽ ảnh hưởng đến user ví dụ 2000)
+                    @[tên group]    hard    nproc       [value] (cẩn thận value thấp quá sẽ ảnh hưởng đến group ví dụ 4000)
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Crack Password Linux
+    Có 2 loại tán công : brute force or dictionary attacks và rainbow tables
+        https://project-rainbowcrack.com/table.htm                  
+    Lợi dụng lỗ hổng về phân quyền file passwd và file shadow để ghi chèn password
+    Sử dụng john the ripper để crack mật khẩu user
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Checking files Integrity with AIDE
+          
+AIDE là host IDE hoạt động bằng cách tạo snapshot cấu hình server sau đó so sánh với real time để tìm điểm khác biệt.
+Tạo database mới    
+    sudo aideinit
+Database được lưu trong /var/lib/aide dưới tên aide.db.new. Cần đổi tên từ new sang aide.db
+Tạo runtime configuration file cho aide
+    sudo update-aide.conf
+Check bằng aide
+    sudo aide -c /var/lib/aide/aide.conf.autogenerated --check > report.txt
+Sau khi check có thể update database 
+    sudo aide -c /var/lib/aide/aide.conf.autogenerated --update 
+Sau đó copy database mới thành database cũ từ new sang aide.db
+File config aide /etc/aide/aide.conf sau đó chạy update-aide.conf để update
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Scan Rootkit
+Tool Rootkit Hunter   
+Update data rkhunter
+    rkhunter --propupd
+
+    rkhunter --check
+Check report
+    rkhunter --check --report-warnings-only
+Thêm whitelist trong file config
+    sudo vim /etc/rkhunter.conf 
+Thêm dòng: SCRIPTWHITELIST=/usr/bin/.....
+ 
+Tool chkrootkit
+Check Rootkit
+    chkrootkit
+Quit chương trình 
+    chkrootkit -q
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+ClamAV
+    sudo apt install clamav clamav-daemon
+Clamav có 2 tiến trình là clamav và clamavd 
+Enable clamav-daemon
+Log clamav
+    tail /var/log/clamav/clamav.log
+Tiến hành scan 
+    clamdscan --fdpass /root (--fdpass để bỏ qua permissions nếu dùng daemon từ user khác)
+Remove tự động
+    clamdscan --remove --fdpass /root
+Move vào quarantine
+    clamdscan --move=/quarantine --fdpass /root (tạo thư mục quarantine)
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+dm-crypt and LUKS (data secure)
+dm-crypt và LUKS bảo vệ data bằng cách mã hóa toàn bộ ổ cứng 
+Trên window để access ổ cứng bị mã hóa bởi LUKS sử dụng LibreCrypt
+Cài đặt cryptsetup
+    sudo apt install cryptsetup
+Backup ổ cứng 
+    dd if=/dev/urandom of =/dev/sdb status=progress
+Encryption ổ cứng (nhớ unmount) (sử dụng pasphrase)
+    cryptsetup -y -v luksFormat /dev/sdb
+
+Open encrypt device
+    cryptsetup luksOpen /dev/sdb secretdata (secretdata là nơi được map ra)\
+check status của mapper 
+    cryptsetup status secretdata 
+Format chuẩn  mkfs.ext4  file /dev/mapper/secretdata
+    mkfs.ext4 /dev/mapper/secretdata
+Thực hiện mount để sử dụng bình thường 
+    mount /dev/mapper/secretdata /mnt 
+
+Close encrypt device 
+Thực hiện unmount 
+    unmount /mnt
+Close luks
+    cryptsetupluksClose secretdata 
+
+Next time using device just open and mount 
+
+Encrypt with key
+Tạo keyfile 
+    dd if=/dev/urandom of=/root/keyfile bs=1024 count=4
+Phân quyền 400 cho keyfile 
+    chmod 400 /root/keyfile
+Encrypt 
+    cryptsetup luksAddKey /dev/sdb /root/keyfile
+Open bằng keyfile
+    cryptsetup luksOpen /dev/sdb secret --key-file /root/keyfile
+Mount và close tương tự như với passpharse
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Symmetric Encryption by GnuPG
+CÓ 2 loại encrypt: Symmetric với private key và asymmetric với public key
+
+Encrypt File with a passpharse GPG default using AES-256 
+    gpg -c secretdata.txt
+Change cipher và xuất ra file name do mình chọn
+    gpg -c --cipher-algo blowfish -o secret_blowfish.txt.gpg secret.txt
+Ghi đè file 100 lần rồi xóa file 
+    shred -vu -n 100 secret.txt
+Decrypt gpg
+    gpg -o secret.txt -d secret.txt.gpg
+Encrypt dưới dạng asc (mã hóa dạng đọc được ascii)
+    gpg -ca secret.txt
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+EncryptPAD (secure text and note, images, video)
+Install EncryptPAD từ trang chủ https://evpo.net/encryptpad/downloads.aspx
+Sử dụng như 1 trình soạn thảo có tích hợp bảo mật
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+STEGANOGRAPHY
+Công nghệ STEGANOGRAPHY lợi dụng màu từ decimal kết hợp với LSB để thay đổi bit cuối cùng trong code màu --> mắt ko phân biệt được sự khác nhau giữa màu cũ màu mới 
+Tỷ lệ chỉnh sửa là 12.5% (do chỉnh sửa mỗi bit trên từng nhóm RGB) 1/8 = 12.5%
+Steghide
+    sudo apt install steghide
+Cần 1 ảnh và 1 đoạn văn bản
+    steghide embed -cf img.jpg -ef secret.txt
+Extract 
+    steghide extract -sf img.jpg
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Nmap 
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Netfilter & Iptables
+
+Chain Traversal in a Nutshell
+
+Incoming traffic is filtered on the INPUT CHAIN of the filter table.
+Outgoing traffic is filtered on the OUTPUT CHAIN of the filter table.
+Routed traffic is filtered on the FORWARD CHAIN of the filter table.
+SNAT/MASQUERADE is performed on the POSTROUTING CHAIN of the nat table.
+DNAT/Port Forwarding is performed on the PREROUTING CHAIN of the nat table. 
+To modify values from the packet's headers add rules to the mangle table.
+To skip the connection tracking add rules with NOTRACK target to the raw table
+
+Iptables Commnand
+
+Table                       Command                     CHAIN                   matches                         Target/Jump
+filter(default)             -A (append)                 INPUT                   -s source_ip                    ACCEPT 
+nat                         -I (insert)                 OUTPUT                  -d dest_ip                      DROP
+mangle                      -D (delete)                 FORWARD                 -p protocol                     REJECT
+raw                         -R (replace)                PREROUTING              --sport source_p                LOG
+                            -F (flush)                  POSTROUTING             --dport dest_p                  SNAT
+                            -Z (zero)                   USER_DEFINED            -i incoming_int                 DNAT
+                            -L (list)                                           -o outgoing_int                 MASQUERADE
+                            -S (show)                                           -m mac                          LIMIT 
+                            -N                                                  -m time                         RETURN 
+                            -X                                                  -m quota                        TEE 
+                                                                                -m limit                        TOS 
+                                                                                -m recent                       TTL 
+
+
+iptables [-t table_name] -COMMAND CHAIN_NAME matches -j TARGET 
+ví dụ : iptables -t filter -A INPUT -p icmp --icmp-type echo-request  -s 192.168.0.10 -j DROP
+        iptables -A OUTPUT  -p tcp --dport 80 -d www.ubuntu.com -j DROP
+
+option -vn show thêm thông tin về packet and bytes
+
+-A sẽ thêm 1 rule vào cuối bảng Iptables
+-I sẽ thêm 1 rule vào đầu bảng Iptables (có thể config vị trí của rules): iptables -I INPUT 3 -p udp --dport 69 -j DROP
+-F sẽ xóa tất cả rules thuộc 1 bảng 
+-Z sẽ reset lại bộ đếm packet và bytes
+-N sẽ tạo ra 1 chain có tên do người dùng đặt 
+-X sẽ xóa 1 chain do người dùng đặt 
+-P sẽ đặt các policy cho các chain  
+-D sẽ xóa 1 hoặc nhiều rules từ chain được chọn 
+-R sẽ thay thế 1 rule trong chain được chọn
+
+Các gói tin sẽ được xử lý từ trên xuống dưới (khi rule đầu được apply thì packet đó sẽ ko bị filter nữa )
+
+Note: rule viết từ terminal sẽ ko được lưu khi hệ thống reboot
+viết script để set rule firewall cần thêm tham số -F để mỗi khi script chạy sẽ clear bảng cũ và chạy rule mới 
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Default Policy
+
+Có 2 kiểu default policy 
+    Thứ 1: Drop tất cả traffic và chỉ add rule allow 1 số IP tin cậy 
+    Thứ 2: Accept tất cả traffic Vầ add rule chặn 
+Check policy 
+    iptables -vnL
+Ví dụ:
+    iptables -P INPUT DROP (chặn tất cả traffic đầu vào)
+Reset về mặc định (Delete Firewall)
+Change policy to accept theo default viết script cấp quyền và chạy
+        iptables -P INPUT ACCEPT
+        iptables -P OUTPUT ACCEPT
+        iptables -P FORWARD ACCEPT
+Flush all table
+        iptables -t filter -F
+        iptables -t nat -F
+        iptables -t mangle -F
+        iptables -t raw -F
+Delete user-defined chains
+        iptables -X 
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Cấu hình firewall chặn theo ip theo dải mạng và theo tên miền
+    iptables -A INPUT -s 192.168.0.20 -j DROP
+    iptables -A OUTPUT -d 8.0.0.0/8 -j DROP
+    iptables -A OUTPUT -d www.ubuntu.com -j DROP
+    
+Cấu hình firewall chặn theo TCP port và UDP port
+    iptables -A INPUT -p tcp --dport 22 -j DROP
+    iptables -A OUTPUT -p tcp -m multiport -- dports 80,443 -j ACCEPT
+
+State Filter Port: là port được mở nhưng có ứng dụng khác(vd firewall,...) drop traffic
+State Closed Port: là port bị đóng ko dùng cho ứng dụng nào
+
