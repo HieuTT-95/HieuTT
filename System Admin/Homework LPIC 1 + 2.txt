@@ -138,7 +138,7 @@ should be on the e. Switch to input mode and add the word text. Don't forget the
 space after the word.
 gg
 /entry
-i ( chuyển mod)
+i ( chuyển mode)
 
 9. Move the cursor to the space after the word mode on the same line. Insert a
 comma. Remember, you are still in input mode.
@@ -250,3 +250,371 @@ vim number1.txt
 :wq
 md5sum number1.txt
 sha512sum number1.txt
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Lesson 3 - Exploring Linux Command-Line Tools - Part 3
+
+The Grep Command
+
+1. Find the line in the /etc/passwd file for user name that start with student.
+cat /etc/passwd | grep student hoặc grep student /etc/passwd
+
+2. Find all lines in the /etc/passwd file that begin with the letter st.
+cat /etc/passwd | grep ^st
+
+3. Find all lines in /etc/passwd that contain a digit 0-9.
+cat /etc/passwd | grep [0-9]
+
+4. Repeat the search in the previous instruction, but this time display only the number of lines that contain the pattern.
+cat /etc/passwd | grep -c [0-9]
+
+5. Use the ps and grep commands to display the processes initiated by users other than yourself.
+ps -ef | grep -v student
+
+6. Create a file with the content as follow, name it anything you want:
+
+        Fred apples 20
+        Susy oranges 5
+        Mark watermelons 12
+        Robert pears 4
+        Terry oranges 9
+        Lisa peaches 7
+        Susy oranges 12
+        Mark grapes 39
+        Anne mangoes 7
+        Greg pineapples 3
+        Oliver rockmellons 2
+        Betty limes 14
+Do the below exercises with this file.
+
+vim test.txt
+i(chuyển mode)
+paste văn bản vào
+Esc rồi :wq để lưu
+
+7. Find all the lines with string mellon
+cat test.txt | grep mellon
+
+8. Find all the lines end with the character 2
+grep '2$' test.txt
+
+9. Find all the people with the name begin with the letter from A to L
+grep '^[A-L]' test.txt
+
+10. Count the number of lines that contain apple
+grep -c 'apple' test.txt
+
+
+Use streams, pipes and redirects
+
+11. Using the cat command and redirection, create a file called junk containing a few lines of text. 
+Use <ctrl-d> at the beginning of a new line when you have finished entering text and want to return the shell $ prompt.
+cat > junk 
+typing something
+Crtl + D to return shell
+
+12. Append more lines of text to the file you have created using the cat command and redirection.
+cat >> junk
+typing something
+Crtl + D to return shell
+
+13. Using the ls command, list the files in your current directory. Make a note of the number of files.------------ có 2 file 
+ls 
+
+14. List the files in your current directory, but this time redirect the output to the file temp.
+ls > temp
+
+15. Use the appropriate command to count the number of words in the temp file. Is this the same count as in instruction 11?
+- If not, why not? Display the contents of temp. Remove the file. not the same because it is result of ls command
+wc -w temp 
+rm temp
+
+16. This time use a pipe to count the number of files in your current directory. Was the result what you expected this time?
+-Is it the same as in instruction 11?
+ls | wc -w 
+
+17. Display all the content of the file you created at exercise 6, but find and replace all the oranges to apples
+cat test.txt | sed '/s/oranges/apple/g'
+
+18. Using xargs and $() to generate the ls -l command to all the file inside your home directory that have string te in the file name
+ls | grep te | xargs ls -l
+hoặc ls -l $(ls | grep te)
+ 
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Lesson 4: Managing Software and Processes Part 1
+
+I. Using RPM package management
+
+1. Login to the CentOS server with user student.
+cred: student/lpic1@123
+
+2. Mount the cdrom to the /mnt directory with the following command
+$ sudo mount -o ro /dev/sr0 /mnt
+
+3. Check if the cdrom is mounted with the following command
+$ df -h  | grep /mnt
+
+4. Change directory to /mnt/Packages
+cd /mnt/Packages
+
+5. Using rpm to install the nano package in verbose mode with the progress information of the installation.
+sudo rpm -ivh nano.2..... (dùng tab để gọi tên package đầy đủ)
+
+6. Using rpm to show the path to config file of nano
+sudo rpm -qc nano (application nano khác với nano.2.1..... là package name)
+
+7. Add some text into the above config file of nano, using rpm to verify the nano package. Does it show anything?
+vim /etc/nanorc
+i (chuyển mode)
+add some text
+Esc rồi :wq! (! do read only)
+
+sudo rpm -V nano 
+có show khác biệt nhé 
+
+8. Remove the changes you made in exercise 7 and re-verify the nano package. The problem is fixed or not?
+no fix 
+
+9. Using rpm to display the information of nano package
+sudo rpm -qi nano 
+
+10. Using rpm to list all the package that installed on you system
+sudo rpm -qa | more
+
+
+II. Using YUM
+
+11. Change directory to /etc/yum.repos.d/ and move all file to the orgn directory using the following command
+$ sudo mv * orgn/
+cd /etc/yum.repos.d
+sudo mv * orgn/
+
+12. Create a file with vim inside the /etc/yum.repos.d/ directory, named it rhel.repo, input the following content and save it.
+    [DVD]
+    name=Local repository from DVD
+    baseurl-file:///mnt
+    enabled=1
+
+cd /etc/yum.repos.d 
+vim rhel.repo
+paste data to file 
+Esc rồi :wq
+
+13. Using yum to search and install emacs
+sudo yum search emacs
+sudo yum install emacs
+
+14. Using yum to display the infomation of nano package
+sudo yum info  nano
+
+15. Using yum to remove emacs and nano
+sudo yum remove nano emacs
+
+IV. Using dpkg and apt suite package manager
+
+16. Login to the Ubuntu server with student.
+cred: student/lpic1@123
+
+17. Using dpkg to list all the package installed on your system
+sudo dpkg -l | more
+
+18. Using apt suite tools to search for and install the emacs and nano
+sudo apt search emacs | grep ^emacs
+sudo apt install emacs
+
+sudo apt search nano | grep ^nano
+sudo apt install nano
+
+19. List all the files of the emacs package
+sudo apt show emacs
+
+20. Using apt suite to remove the nano and emacs package.
+sudo apt remove emacs nano
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Lesson 4: Managing Software and Processes Part 2
+
+I. Prepare the environment
+
+1. Login to the ubuntu server and install the screen and tux package
+cred: student/lpic1@123
+sudo apt install tmx screen
+
+II. Managing the shared library
+
+1. Login to the ubuntu server as student.
+cred: student/lpic1@123
+
+2. Show all the libraries existed in the server and re-create the library cache
+sudo ldconfig -v | more
+
+3. Show all the libraries in library cache, how many libs found in the cache?
+ldconfig -p | wc -l  
+
+4. Review the information in /etc/id.so.conf file and read some files inside the /etc/d.so.conf.d directory
+cat /etc/id.so.conf
+cd /etc/d.so.conf.d
+more <file name>
+
+5. Specify which libraries will be called if the echo command runs.
+ldd /bin/echo
+
+III. Create, monitor and kill process
+
+6. Display all processes running in the server and describe the information on the screen.
+ps -ef | more
+
+7. Using top to monitor the system load and processes. Try to describe all the information on the screen.
+top
+
+8. Showing the help page of top and escape.
+man top
+
+
+Using screen
+
+9. Type screen to create the first window screen.
+screen
+
+10. Issue top to monitoring system state.
+top
+
+11. Split the window into two regions (horizontal).
+Ctrl + a + S
+
+12. Jump to the bottom region. Do you get the shell prompt there?
+Ctrl + a + Tab 
+No 
+
+13. Create a window within the bottom region to get the shell prompt.
+Ctrl + a + C
+
+14. Issue a command to view the from the end of /var/log/syslog in realtime mode.
+sudo tail -f /var/log/syslog
+
+15. Split the current window vertically.
+Ctrl + a + I
+
+1s. Now the focus is in the lower-left window. Jump to the lower-right Isus.
+Ctrl + a + Tab
+
+17. Escape the current window
+Ctrl + a + D
+
+18. List the screens existed in the server
+screen -ls
+
+19. Re-connect to your screen. Does the windows layout remain?
+screen -r <screen id>
+
+20. Kill the current screen by pressing Ctrl + a prefix and K
+Ctrl + a + K
+
+
+Using tmux
+
+21. Type tmux to create the first window screen.
+tmux
+
+22. Issue top to monitoring system state.
+top
+
+23. Split the window into two regions (horizontal).
+Ctrl + b + "
+
+24. Jump to the bottom region. Do you get the shell prompt there?
+25. Create a window within the bottom region to get the shell prompt.
+không cần tạo window như screen
+
+26. Issue a command to view the from the end of /var/log/syslog in realtime mode.
+sudo tail -f /var/log/syslog
+
+27. Split the current window vertically.
+Ctrl + b + %
+
+28. Now the focus is in the lower-left window. Jump to the lower-right focus.
+Ctrl + b + o
+
+29. Escape the current window
+Crtl + b + d
+
+30. List the screens existed in the server
+tmux ls
+
+31. Re-connect to your screen. Does the windows layout remain?
+tmux attach-session -t <id>
+
+32. Kill the current screen by pressing Ctrl+B prefix and K
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Lesson 5: Managing Software and Processes Part 3
+
+I. Create, monitor and kill process (cont)
+
+1. Login to the ubuntu system with the username and password provided.
+cred: student/lpic1@123
+
+2. List all the files and directories existed in your server in foreground using ls -R / command.
+ls -R / 
+
+3. Run the above command in background. Is there any information showed on your screen? Could you utilize the shell?
+ls -R / & 
+No information on screen. 
+
+4. Re-do the step 3 but redirect stout and stderr of the command to a file named log. Could you utilize the shell now?
+ls -R / & > log &
+
+5. Run the command sleep 300 in background.
+sleep 300 &
+
+6. List all the background jobs in your system with their process id
+jobs -l 
+
+7. Kill the job created in step 5
+kill %<id>
+
+8. Run sleep 300 command in foreground
+sleep 300
+
+9. Move the process created in step 8 to background
+Suspend process(Ctrl + Z) để lấy id rồi 
+bg %<id>
+
+10. Move back the above process to foreground
+fg %<id>
+
+11. Run the sleep 300 command in background, send the following signal to the process one by one and re-run the process after each. 
+Using jobs command after sending the signal to confirm that you sent the correct signal.
+    SIGTERM (mặc định)
+    SIGINT (-2)
+    SIGKILL (-9)
+    SIGHUP (-1)
+sleep 300 &
+jobs -l
+kill <pid> (các signal khác thêm option )
+jobs (để kiểm tra trạng thái)
+
+12. Run the sleep 300 command again and this time you have to ensure that the process will still be running after you logout. 
+Specify the PPID of the process before and after you log-out.
+nohup sleep 300 &
+ps -ef | grep sleep
+logout
+
+13. Using the ps command to show the nice value of the running processes
+ps -eo user,pid,ppid,ni,comm
+
+14. Run the sleep 300 command in background with the nice value 10. Using ps command to display the nice value of the sleep process.
+nice -n 10 sleep 300 &
+ps -eo user,pid,ppid,ni,comm
+
+15. Change the nice value of sleep process to -5. Using ps command to display the nice value after changing.
+sudo renice -n -5 <pid của sleep>
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
