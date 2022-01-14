@@ -405,3 +405,4 @@ Cấu hình firewall chặn theo TCP port và UDP port
 State Filter Port: là port được mở nhưng có ứng dụng khác(vd firewall,...) drop traffic
 State Closed Port: là port bị đóng ko dùng cho ứng dụng nào
 
+

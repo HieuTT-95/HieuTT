@@ -618,3 +618,54 @@ sudo renice -n -5 <pid của sleep>
 
 -------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+Lesson 6: Configuring Hardware Part 1
+
+I. Prepare the environment
+1. Login to the Ubuntu server with user student and install the procinfo package
+cred: student/lpic1@123
+sudo apt install procinfo
+
+I. Monitoring hardware status and modules
+1. List the devices added to the system inside the /dev directory
+ls /dev
+
+2. Review the /proc directory structure, where the processes' information are stored
+/proc/<id>/directory
+
+3. Show the IRQ address of all the devices existing.
+/proc/interrupts
+
+4. Show the I/O port location of all devices existing.
+/proc/ioports
+
+5. Show all the dma channel existing.
+/proc/dma
+
+6. Display the system cpu, memory information
+/proc/cpuinfo
+/proc/meminfo
+
+7. Display the information of all scsi block devices existing.
+lsblk -S
+
+8. List all the PCI devices with verbose information
+lspci -v
+
+9. List all the usb devices existing.
+lsusb
+
+10. List all hardware modules that currently loaded in the system and show detail infomation of the first module
+lsmod   
+modinfo <module name>
+
+11. Install the btusb module
+modprobe -iv btusb
+
+12. Remove the modules installed on step 11
+modprobe -rv btusb
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+Lesson 7: Configuring Hardware Part 2
+
