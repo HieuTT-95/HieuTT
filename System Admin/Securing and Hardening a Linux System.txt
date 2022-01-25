@@ -405,4 +405,50 @@ Cấu hình firewall chặn theo TCP port và UDP port
 State Filter Port: là port được mở nhưng có ứng dụng khác(vd firewall,...) drop traffic
 State Closed Port: là port bị đóng ko dùng cho ứng dụng nào
 
+---------------------------------------------------------------------------------------------------------------------------------------------
 
+Statefull Firewall
+Firewall có tính năng connec tracking thì gọi là firewall fullstate (monitor traffic mạng từ điểm đầu đến điểm cuối dựa theo header), tường lửa Statefull cho biết trạng thái của kết nối TCP
+có thể kết hợp với 1 số chức năng như IP Security(IPSec)
+
+Cấu hình iptables chặn theo state 
+    iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Cấu hình firewall chặn theo MAC Address
+    iptables -A INPUT -i wlan0 -m mac --mac-source 08:00:27:55:6f:20 -j DROP
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Cấu hình firewall chặn theo date and time
+ALl option -time của iptables
+    iptables -m time --help
+Default using UTC time not system time
+Tham số --kerneltz cho phép chuyển sang sử dụng system time
+
+Permit SSH between 10AM to 4 PM   
+    iptables -A INPUT -p tcp --dport 22 -m time --timestart 10:00 --timestop 16:00 -j ACCEPT
+Ngoài khung giờ thì drop
+    iptables -A INPUT -p tcp --dport 22 -j DROP    
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Các option thêm của icmp
+    iptables -p icmp --help (tham số đi theo : --icmp-type)
+Ví dụ:
+    iptables -A INPUT -p icmp --icmp-type echo-request -s 192.168.0.112 -j ACCEPT
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Lưu Log
+Log lưu thông tin về các trường headers
+ULOG có hỗ trợ cho mysql
+Có thể dùng để lock target trong lúc đang test rule 
+
+    iptables -A INPUT -p tcp --dport 22 --syn -j LOG --log-prefix="Incoming SSH:"  --log-level info 
+    (chặn gói tin syn đầu tiên từ port 22)
+
+Đọc log bằng dmesg và log kernel
+Dmesg chỉ hiển thị log ở buffer ram 
+Chi tiết log được lưu ở /var/log/kern.log 
