@@ -1,0 +1,56 @@
+Challenge Secure the server
+
+Challenge #1
+
+1. Start 2 Linux VMs. In these labs, they are called Kali (VM1) and Ubuntu (VM2).
+Done
+
+2. Check that they can ping each other.
+ping <IP Ubuntu>
+ping <IP Kali>
+
+3. Install and start at least three or four services on Ubuntu (ssh proftpd postfix apache2). Check that they are running.
+On Ubuntu
+sudo apt install proftpd postfix apache2
+systemctl status apache2
+systemctl status sshd
+systemctl status proftpd
+systemctl status postfix 
+
+Note: In the following examples (challenges) Ubuntu has 10.80.80.128 as IP address.
+      In the following examples (challenges) Kali has 10.80.80.129 as IP address.
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Challenge #2
+
+From Kali Linux scan Ubuntu using Syn Scan (Half Open Scanning - root only)
+sudo nmap -sS 10.80.80.128
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Challenge #3
+
+From Kali Linux scan the versions of the services that run on ports 22 and 25 on Linux Mint.
+sudo nmap -sV -p 22,25 10.80.80.128
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Challenge #4
+
+From Kali Linux scan the entire LAN using a PING scan. Add an option for faster execution.
+sudo nmap -sn -T4 10.80.80.0/24 (-sP)
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Challenge #5
+
+From Kali Linux scan the first 100 ports on Linux Mint using OS detection, version detection, script scanning, and faster execution.
+sudo nmap -O -sV -sC -T4 -p 1-100 10.80.80.128
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+Challenge #6
+
+Export the scan report from Challenge #5 into a file.
+sudo nmap -O -sV -sC -T4 -p 1-100 10.80.80.128 -o result.txt (-oN)
