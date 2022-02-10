@@ -1,4 +1,6 @@
-Challenge Secure the server
+Challenge Secure the server 
+
+(Scanning with Nmap)
 
 Challenge #1
 
@@ -54,3 +56,206 @@ Challenge #6
 
 Export the scan report from Challenge #5 into a file.
 sudo nmap -O -sV -sC -T4 -p 1-100 10.80.80.128 -o result.txt (-oN)
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+(Challenges - Netfilter and Iptables)
+
+Challenge #1
+
+Write the iptables commands that set the default POLICY to ACCEPT on INPUT and OUTPUT chains and DROP on FORWARD chain
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD DROP
+
+Challenge #2
+
+Write the iptables command that lists only the filter table of INPUT chain.
+iptables -t filter -vnL INPUT
+
+Challenge #3
+
+Write the iptables command that flushes the filter table of all chains.
+iptables -t filter -F
+or
+iptables -F
+
+Challenge #4
+
+Write an iptables rule that drops all incoming packets to port 22/tcp (ssh). This should be the first rule in the chain.
+iptables -I INPUT -p tcp --dport 22 -j DROP (chèn vào dòng đầu tiên của bảng rule)
+
+Challenge #5
+
+Write the iptables commands that flush all the tables of all chains and set the ACCEPT policy on all chains. This will delete any firewall.
+iptables -F (push all chain)
+
+iptables -t nat -F
+iptables -t mangle -F
+iptables -t raw -F
+
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+iptables -P FORWARD ACCEPT
+
+iptables -X (delete all non-default chain)
+
+
+Challenge #6
+
+Write the iptables rules that drop all incoming packets from 100.0.0.1 and 1.2.3.4 and all outgoing packets to 80.0.0.1
+These will be the first rules in the chains.(Chèn vào dòng đầu trong bảng rule thì dùng Insert)
+iptables -I INPUT -s 100.0.0.1 -j DROP
+iptables -I INPUT -s 1.2.3.4 -j DROP
+iptables -I OUTPUT -d 80.0.0.1 -j DROP 
+ 
+
+Challenge #7
+
+Write the iptables rules that drop all outgoing generated packets of type tcp (port 80 and 443) to www.linuxquestions.org
+iptables -A OUTPUT -p tcp --dport 80 -d www.linuxquestions.org -j DROP
+iptables -A OUTPUT -p tcp --dport 443 -d www.linuxquestions.org -j DROP
+
+
+Challenge #8
+
+Write the iptables rules that drop all outgoing packets of type tcp (port 80 and 443) to www.linuxquestions.org
+The Linux machine is the router.(router thì dùng chain forward)
+iptables -A FORWARD -p tcp --dport 80 -d www.linuxquestions.org -j DROP
+iptables -A FORWARD -p tcp --dport 443 -d www.linuxquestions.org -j DROP
+
+
+Challenge #9
+
+Write an iptables rule that drops all incoming packets from network 27.103.0.0 255.255.0.0
+This will be the first rule in the chain.
+
+iptables -I INPUT -s 27.103.0.0/16 -j DROP
+ 
+
+Challenge #10
+
+The DNS Server of your LAN is set to 8.8.8.8. You don't want to allow the users of the LAN to change the DNS server.
+Write an iptables rule in order to drop all UDP packets to port 53 (DNS) if they are destined to another IP address (not to 8.8.8.8). The Linux Machine is the Router.
+iptables  -A FORWARD -p udp --dport 53 ! -d 8.8.8.8 -j DROP
+
+
+Challenge #11
+
+Create a firewall script for your Laptop that runs Linux. All outgoing traffic is allowed but only the return incoming traffic is permitted. No services are running on the laptop.
+
+#!/bin/bash
+iptables -F 
+iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+iptables -A OUTPUT -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
+
+iptables -P INPUT DROP
+iptables -P OUTPUT DROP
+
+
+Challenge #12
+
+The MAC Address of the LAN Router is b4:6d:83:77:85:f5
+Write a single iptables rule that allows the communication of your Linux host only with the router. It cannot communicate with other hosts inside the same LAN. Do not modify the policy.
+iptables -A INPUT -i wlan0 -m mac ! --mac-source b4:6d:83:77:85:f5 -j DROP
+ 
+
+Challenge #13
+
+Write the iptables rules that permit outgoing web traffic (tcp ports 80 and 443) only between 10:00 and 18:00 UTC.
+iptables -A OUTPUT -p tcp -m multiport --dport 80,443 -m time --timestart 10:00 --timestop 18:00 -j ACCEPT
+iptables -A OUTPUT -p tcp -m multiport --dport 80,443 -j DROP 
+
+
+
+Challenge #14
+
+Consider Challenge #13. Add a match to allow web traffic only on the weekend between 10:00 and 18:00 UTC.
+
+iptables -A OUTPUT -p tcp -m multiport --dport 80,443 -m time weekdays 6,7 --timestart 10:00 --timestop 18:00 -j ACCEPT
+iptables -A OUTPUT -p tcp -m multiport --dport 80,443 -j DROP
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+(Challenges - John The Ripper (JTR))       
+
+Challenge #1
+
+To add the user run useradd admin and to set its password run passwd admin hoặc adduser rồi làm theo hướng dẫn của nó.
+On your Linux system add a new user called admin and set its password to iloveyou!
+
+sudo adduser admin
+
+Using John the Ripper try to crack the user’s password using this wordlist: /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+
+sudo unshadow /etc/passwd /etc/shadow > unshadow.txt
+sudo john --wordlist=/usr/share/metasploit-framework/data/wordlists/unix_passwords.txt --users=admin unshadow.txt
+
+
+Challenge #2
+
+1. On your Linux system combine the following 3 wordlists into a single big file.
+/usr/share/john/password.lst
+
+/usr/share/dict/american-english
+
+/usr/share/metasploit-framework/data/wordlists/unix_passwords.txt
+
+cat /usr/share/john/password.lst /usr/share/dict/american-english /usr/share/metasploit-framework/data/wordlists/unix_passwords.txt >> big.txt
+
+
+2. Eliminate any possible duplicates from the big wordlist.
+
+sort big.txt | uniq -u
+
+
+3. Check how many entries (words) are in the wordlist.
+wc -l big.txt
+
+
+4. Run a dictionary attack against all passwords of the system using the big wordlist.
+sudo unshadow /etc/passwd /etc/shadow > unshadow.txt
+sudo john --wordlist=/home/kali/big.txt unshadow.txt
+
+5. While the john is running, interrupt the cracking session.
+ctrl + C
+
+
+6. Restore the interrupted session.
+john -restore
+
+
+Challenge #3
+
+Run an incremental attack using John the Ripper against all passwords of the system.
+john --incremental unshadow.txt
+
+
+---------------------------------------------------------------------------------------------------------------------------------------------
+
+(Challenges - Steganography)
+
+Challenge #1
+
+Using steghide hide this text file into this image. After that remove the text file that was hidden.
+steghide embed -cf "image.jpg" -ef "hide this text.txt" (sau đó tạo password)
+rm "hide this text.txt"
+
+Challenge #2
+
+Using the files from Challenge #1 extract the secret file from the stego file.
+steghide extract -sf image.jpg (sau đó nhập password)
+
+
+Challenge #3
+
+This image has a secret file embedded inside it. Using steghide recover the file if the password is barcelona
+steghide extract -sf image.jpg (sau đó nhập password)
+
+
+Challenge #4
+
+Check the solution of the previous challenge by calculating the SHA-256 hash of the file you’ve extracted.
+The hash you should get is bc2eec571b9b43e94b19e7a53286d2c7dcf6c5e00cdab86a3b741d20b79019dc
+sha256sum secret.txt (rồi so sánh)
